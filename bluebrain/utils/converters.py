@@ -14,7 +14,7 @@ from typing import (
     Iterable, 
     Optional, 
     Any, 
-    SupportsInt, 
+    SupportsInt,
     TYPE_CHECKING, 
     Union
 )
@@ -152,14 +152,25 @@ class Command(Converter):
 
 class SearchedMember(Converter):
     async def convert(self, ctx, arg):
+        obj_list = []
+
+        for m in ctx.get_guild().get_members():
+            obj_list.append((await ctx.bot.rest.fetch_user(m)))
+
+        async def grab_object(x):
+            person = await ctx.bot.rest.fetch_user(x)
+            return person.username
+
         if (
             member := get(
-                ctx.get_guild().get_members(),
-                name=str(Search(arg, [m.username for m in ctx.get_guild().get_members()]).best(min_accuracy=0.75)),
+                obj_list,
+                username=str(Search(arg, [(await grab_object(m)) for m in ctx.get_guild().get_members()]).best(min_accuracy=0.75)),
             )
         ) is None:
             raise hikari.NotFoundError
         print(member)
+        print(member.username)
+        print(member.id)
         return member
 
 

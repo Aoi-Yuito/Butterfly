@@ -2,9 +2,7 @@ import hikari
 import lightbulb
 
 from time import time
-import typing as t
-from bluebrain.utils import Search
-from bluebrain.utils import checks, converters
+from bluebrain.utils import checks
 from bluebrain.bot import Blue_Bot
 
 class Meta(lightbulb.Plugin):
@@ -62,27 +60,6 @@ class Meta(lightbulb.Plugin):
         help_text = lightbulb.get_help_text(self.h_command)
         await ctx.respond(help_text)
 
-
-    @lightbulb.check(lightbulb.guild_only)
-    @lightbulb.command(name="m")
-    async def m_command(self, ctx: lightbulb.Context, target: t.Optional[t.Union[hikari.Member, converters.SearchedMember, str]], name: str) -> None:
-        async def grab(x):
-            person = await ctx.bot.rest.fetch_user(x)
-            return person.username
-        lists = []
-        for m in ctx.get_guild().get_members():
-            lists.append((await ctx.bot.rest.fetch_user(m)))
-        print(lists)
-        if (member := converters.get(
-                lists,
-                username=str(Search(name, [(await grab(m)) for m in ctx.get_guild().get_members()]).best(min_accuracy=0.75)),
-            )) is not None:
-            print(member)
-            print(member.username)
-            print(member.id)
-
-
-        
 
 
 def load(bot: Blue_Bot) -> None:

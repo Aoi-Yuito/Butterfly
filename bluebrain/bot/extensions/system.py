@@ -8,7 +8,7 @@ class System(lightbulb.Plugin):
 
     def __init__(self, bot: Blue_Bot) -> None:
         self.bot = bot
-        self.configurable = True
+        self.configurable: bool = True
         super().__init__()
 
 

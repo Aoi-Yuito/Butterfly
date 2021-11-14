@@ -29,7 +29,7 @@ class Hub(lightbulb.Plugin):
 
 
     @lightbulb.plugins.listener()
-    async def on_guild_available(self, event: events.GuildAvailableEvent) -> None:
+    async def on_guild_join(self, event: events.GuildJoinEvent) -> None:
         self.guild = await self.bot.rest.fetch_guild(Config.HUB_GUILD_ID)
 
         if self.guild is not None:

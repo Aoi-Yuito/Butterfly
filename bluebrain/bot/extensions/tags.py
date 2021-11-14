@@ -60,7 +60,7 @@ class Tags(lightbulb.Plugin):
         name="tags",
         insensitive_commands=True,
         inherit_checks=True
-        )
+    )
     async def tags_group(self, ctx: lightbulb.Context) -> None:
         """Commands to create tags in the server."""
         prefix = await self.bot.prefix(ctx.get_guild().id)
@@ -221,7 +221,7 @@ class Tags(lightbulb.Plugin):
     @checks.bot_is_ready()
     @lightbulb.check(lightbulb.guild_only)
     @tags_group.command(name = "all")
-    async def member_tag_list_command(self, ctx: lightbulb.Context, target: t.Optional[t.Union[hikari.Member, converters.User, converters.SearchedMember, str]]) -> None:
+    async def member_tag_list_command(self, ctx: lightbulb.Context, target: t.Optional[converters.SearchedMember]) -> None:
         """Shows the tag list of a tag owner."""
         target = target or ctx.author
         prefix = await self.bot.prefix(ctx.get_guild().id)
@@ -265,7 +265,7 @@ class Tags(lightbulb.Plugin):
                 embed=self.bot.embed.build(
                 ctx=ctx,
                 header="Tags",
-                title=f"All tags of this server for {self.user.name}",
+                title=f"All tags of this server for {self.user.username}",
                 description=f"Using {len(tag_names)} of this server's {len(all_tags)} tags.",
                 thumbnail=self.user.avatar_url,
                 fields=((tag_name, f"ID: {tag_id}", True) for tag_name, tag_id in sorted(tag_all)),
