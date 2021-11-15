@@ -24,10 +24,10 @@ class Meta(lightbulb.Plugin):
     async def ping_command(self, ctx: lightbulb.Context) -> None:
         lat = self.bot.heartbeat_latency * 1_000
         s = time()
-        pm = await ctx.respond(f"{(await self.bot.info)} Pong! DWSP latency: {lat:,.0f} ms. Response time: - ms.")
+        pm = await ctx.respond(f"{self.bot.info} Pong! DWSP latency: {lat:,.0f} ms. Response time: - ms.")
         e = time()
         await pm.edit(
-            content=f"{(await self.bot.info)} Pong! DWSP latency: {lat:,.0f} ms. Response time: {(e-s)*1_000:,.0f} ms."
+            content=f"{self.bot.info} Pong! DWSP latency: {lat:,.0f} ms. Response time: {(e-s)*1_000:,.0f} ms."
         )
 
 

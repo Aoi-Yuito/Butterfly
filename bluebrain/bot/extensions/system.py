@@ -25,7 +25,7 @@ class System(lightbulb.Plugin):
         prefix = await self.bot.prefix(ctx.get_guild().id)
         await ctx.send("fdsf")
         await ctx.respond(
-            f"{(await self.bot.info)} Blue Brain's prefix in this server is {prefix}. To change it, use `{prefix}config system prefix <new prefix>`."
+            f"{self.bot.info} Blue Brain's prefix in this server is {prefix}. To change it, use `{prefix}config system prefix <new prefix>`."
         )
 
 

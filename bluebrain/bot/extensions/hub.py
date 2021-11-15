@@ -24,7 +24,7 @@ class Hub(lightbulb.Plugin):
 
             if self.stdout_channel is not None:
                 await self.stdout_channel.send(
-                    f"{(await self.bot.info)} Blue Brain is now online! (Version {self.bot.version})"
+                    f"{self.bot.info} Blue Brain is now online! (Version {self.bot.version})"
                 )
 
 
@@ -43,7 +43,7 @@ class Hub(lightbulb.Plugin):
 
         if self.stdout_channel is not None:
             await self.stdout_channel.send(
-                f"{(await self.bot.info)} Joined guild! Nº: `{self.bot.guild_count}` • Name: `{event.guild}` • Members: `{len(event.members):,}` • ID: `{event.guild.id}`"
+                f"{self.bot.info} Joined guild! Nº: `{self.bot.guild_count}` • Name: `{event.guild}` • Members: `{len(event.members):,}` • ID: `{event.guild.id}`"
             )
 
 
@@ -62,7 +62,7 @@ class Hub(lightbulb.Plugin):
 
         if self.stdout_channel is not None:
             await self.stdout_channel.send(
-                f"{(await self.bot.info)} Left guild. Name: `{guild_name[0]}` • Members: `Null` • ID: `{event.guild_id}` • Nº of guild now: `{self.bot.guild_count}`"
+                f"{self.bot.info} Left guild. Name: `{guild_name[0]}` • Members: `Null` • ID: `{event.guild_id}` • Nº of guild now: `{self.bot.guild_count}`"
             )
 
 

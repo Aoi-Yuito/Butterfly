@@ -11,6 +11,7 @@ from pytz import utc
 from bluebrain import Config, utils
 from bluebrain.db import Database
 
+EMOJI_GUILD = None
 
 class Blue_Bot(lightbulb.Bot):
 
@@ -103,6 +104,8 @@ class Blue_Bot(lightbulb.Bot):
 
             print(" Readied.")
             self.client_id = self.get_me().id
+            emoji_guild = await self.rest.fetch_guild(Config.HUB_GUILD_ID)
+            print(emoji_guild)
 
             self.scheduler.start()
             print(f" Scheduler started ({len(self.scheduler.get_jobs()):,} job(s)).")
@@ -132,7 +135,7 @@ class Blue_Bot(lightbulb.Bot):
 
         hub = self.get_plugin("Hub")
         if (sc := getattr(hub, "stdout_channel", None)) is not None:
-            await sc.send(f"{(await self.info)} Blue Brain is now shutting down. (Version {self.version})")
+            await sc.send(f"{self.info} Blue Brain is now shutting down. (Version {self.version})")
 
         print(" Closing connection to Discord...")
 
@@ -180,19 +183,19 @@ class Blue_Bot(lightbulb.Bot):
         )
 
     @property
-    async def info(self):
-        emoji = await self.rest.fetch_guild(Config.HUB_GUILD_ID)
-        return emoji.get_emoji(796345797112365107).mention
+    def info(self):
+        #emoji = await self.rest.fetch_guild(Config.HUB_GUILD_ID)
+        return EMOJI_GUILD.get_emoji(796345797112365107).mention
 
     @property
-    async def tick(self):
-        emoji = await self.rest.fetch_guild(Config.HUB_GUILD_ID)
-        return emoji.get_emoji(832160810738253834).mention
+    def tick(self):
+        #emoji = await self.rest.fetch_guild(Config.HUB_GUILD_ID)
+        return EMOJI_GUILD.get_emoji(832160810738253834).mention
 
     @property
-    async def cross(self):
-        emoji = await self.rest.fetch_guild(Config.HUB_GUILD_ID)
-        return emoji.get_emoji(832160894079074335).mention
+    def cross(self):
+        #emoji = await self.rest.fetch_guild(Config.HUB_GUILD_ID)
+        return EMOJI_GUILD.get_emoji(832160894079074335).mention
 
     @staticmethod
     def generate_id():

@@ -26,7 +26,7 @@ class Error(lightbulb.Plugin):
 
         if (sc := getattr(hub, "stdout_channel", None)) is not None:
             if guild_id is not None:
-                await sc.send(f"{(await self.bot.cross)} Something went wrong (ref: {ref}).")
+                await sc.send(f"{self.bot.cross} Something went wrong (ref: {ref}).")
 
         if channel_id is not None:
             if guild_id is not None:
@@ -34,12 +34,12 @@ class Error(lightbulb.Plugin):
                 guild = await self.bot.rest.fetch_guild(guild_id)
                 channel = guild.get_channel(channel_id)
                 await channel.send(
-                    f"{(await self.bot.cross)} Something went wrong (ref: {ref}). Quote this reference in the support server, which you can get a link for by using `{prefix}support`."
+                    f"{self.bot.cross} Something went wrong (ref: {ref}). Quote this reference in the support server, which you can get a link for by using `{prefix}support`."
                 )
             elif guild_id is None:
                 await self.bot.rest.create_message(
                     channel=channel_id,
-                    content=f"{(await self.bot.cross)} Blue Brain does not support command invokations in DMs."
+                    content=f"{self.bot.cross} Blue Brain does not support command invokations in DMs."
                 )
 
         raise err
