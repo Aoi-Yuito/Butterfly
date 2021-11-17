@@ -84,6 +84,7 @@ class Blue_Bot(lightbulb.Bot):
             self.load_extension(f"bluebrain.bot.extensions.{ext}")
             print(f" • {ext} extension loaded")
 
+        self.emoji_guild = await self.rest.fetch_guild(Config.HUB_GUILD_ID)
         
         print("Setup complete.")
 
@@ -104,8 +105,6 @@ class Blue_Bot(lightbulb.Bot):
 
             print(" Readied.")
             self.client_id = self.get_me().id
-            emoji_guild = await self.rest.fetch_guild(Config.HUB_GUILD_ID)
-            print(emoji_guild)
 
             self.scheduler.start()
             print(f" Scheduler started ({len(self.scheduler.get_jobs()):,} job(s)).")
@@ -157,7 +156,7 @@ class Blue_Bot(lightbulb.Bot):
 
     @property
     def user_count(self):
-        return len(self.cashe.get_members_view())
+        return len(self.cache.get_members_view())
 
     @property
     def admin_invite(self):
@@ -185,17 +184,17 @@ class Blue_Bot(lightbulb.Bot):
     @property
     def info(self):
         #emoji = await self.rest.fetch_guild(Config.HUB_GUILD_ID)
-        return EMOJI_GUILD.get_emoji(796345797112365107).mention
+        return self.emoji_guild.get_emoji(796345797112365107).mention
 
     @property
     def tick(self):
         #emoji = await self.rest.fetch_guild(Config.HUB_GUILD_ID)
-        return EMOJI_GUILD.get_emoji(832160810738253834).mention
+        return self.emoji_guild.get_emoji(832160810738253834).mention
 
     @property
     def cross(self):
         #emoji = await self.rest.fetch_guild(Config.HUB_GUILD_ID)
-        return EMOJI_GUILD.get_emoji(832160894079074335).mention
+        return self.emoji_guild.get_emoji(832160894079074335).mention
 
     @staticmethod
     def generate_id():

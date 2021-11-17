@@ -56,9 +56,23 @@ class Meta(lightbulb.Plugin):
     @lightbulb.command(name="h")
     async def h_command(self, ctx: lightbulb.Context) -> None:
         """get help text"""
-        await ctx.send_help(ctx.command)  
-        help_text = lightbulb.get_help_text(self.h_command)
-        await ctx.respond(help_text)
+        #await ctx.send_help(ctx.command)  
+        #help_text = lightbulb.get_help_text(self.h_command)
+        #await ctx.respond(help_text)
+        
+        #from bluebrain.utils.modules import retrieve
+        #await ctx.respond((await retrieve.log_channel(ctx.bot, ctx.get_guild().id)))
+        
+        #bot = await self.bot.rest.fetch_member(ctx.get_guild().id, 841547626772168704)
+        #perm = lightbulb.utils.permissions_for(bot)
+        #print(perm.ADMINISTRATOR)
+
+        #msg = await ctx.respond("test")
+        #emoji = []
+        #emoji.append(ctx.bot.cache.get_emoji(832160810738253834))
+        #emoji.append(ctx.bot.cache.get_emoji(832160894079074335))   
+        #for em in emoji:
+        #    await msg.add_reaction(em)
 
 
 

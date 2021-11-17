@@ -73,7 +73,7 @@ class Warn(lightbulb.Plugin):
             return await ctx.respond(f"{self.bot.cross} That warn type does not exist.")
 
         for target in targets:
-            if target.bot:
+            if target.is_bot:
                 await ctx.respond(f"{self.bot.info} Skipping {target.display_name} as bots can not be warned.")
                 continue
 
@@ -169,7 +169,7 @@ class Warn(lightbulb.Plugin):
                 header="Warn",
                 title=f"Warn information for {target.username}",
                 description=f"{points} point(s) accumulated. Showing {min(len(records), 10)} of {len(records)} warning(s).",
-                colour=target.get_top_role().color,
+                #colour=target.get_top_role().color,
                 thumbnail=target.avatar_url,
                 fields=(
                     (
