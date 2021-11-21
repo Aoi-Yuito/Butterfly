@@ -67,12 +67,32 @@ class Meta(lightbulb.Plugin):
         #perm = lightbulb.utils.permissions_for(bot)
         #print(perm.ADMINISTRATOR)
 
-        #msg = await ctx.respond("test")
-        #emoji = []
-        #emoji.append(ctx.bot.cache.get_emoji(832160810738253834))
-        #emoji.append(ctx.bot.cache.get_emoji(832160894079074335))   
-        #for em in emoji:
-        #    await msg.add_reaction(em)
+        #async with ctx.get_channel().trigger_typing():
+        #    msg = await ctx.respond("test")
+        #    emoji = []
+        #    emoji.append(ctx.bot.cache.get_emoji(832160810738253834))
+        #    emoji.append(ctx.bot.cache.get_emoji(832160894079074335))   
+        #    for em in emoji:
+        #await msg.add_reaction(em)
+
+        #perm = lightbulb.utils.permissions_in(
+        #    ctx.get_channel(),
+        #    await ctx.bot.rest.fetch_member(
+        #        ctx.get_guild().id,
+        #        841547626772168704
+        #    ),
+        #    True
+        #)
+        #if not perm:
+        #    print(perm.SEND_MESSAGES)
+
+        #perm = lightbulb.utils.permissions_for(
+        #    await ctx.bot.rest.fetch_member(
+        #        ctx.get_guild().id,
+        #        841547626772168704
+        #    )
+        #)
+        #print(perm)
 
 
 

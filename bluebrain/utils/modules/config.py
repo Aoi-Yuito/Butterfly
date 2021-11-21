@@ -1,4 +1,5 @@
 import hikari
+import lightbulb
 
 from bluebrain.utils import string
 from bluebrain.utils.modules import retrieve
@@ -19,11 +20,11 @@ MIN_STRIKES = 1
 MAX_STRIKES = 9
 
 
-async def system__runfts(bot, channel, value):
-    await bot.db.execute("UPDATE system SET RunFTS = ? WHERE GuildID = ?", value, channel.guild_id)
+async def system__runfts(ctx, channel, value):
+    await ctx.bot.db.execute("UPDATE system SET RunFTS = ? WHERE GuildID = ?", value, channel.guild_id)
 
 
-async def system__prefix(bot, channel, value):
+async def system__prefix(ctx, channel, value):
     """The server prefix
     The prefix Solaris responds to, aside from mentions. The default is >>."""
     if not isinstance(value, str):
@@ -33,24 +34,33 @@ async def system__prefix(bot, channel, value):
             f"{bot.cross} The server prefix must be no longer than {MAX_PREFIX_LEN} characters in length."
         )
     else:
-        await bot.db.execute("UPDATE system SET Prefix = ? WHERE GuildID = ?", value, channel.guild_id)
+        await ctx.bot.db.execute("UPDATE system SET Prefix = ? WHERE GuildID = ?", value, channel.guild_id)
         await channel.send(f"{bot.tick} The server prefix has been set to {value}.")
-        lc = await retrieve.log_channel(bot, channel.guild_id)
+        lc = await retrieve.log_channel(ctx.bot, channel.guild_id)
         await lc.send(f"{bot.info} The server prefix has been set to {value}.")
 
 
-########
-async def system__logchannel(bot, channel, value):
+async def system__logchannel(ctx, channel, value):
     """The log channel
     The channel Solaris uses to communicate important information. It is recommended you keep this channel restricted to members of the server's moderation team. Upon selecting a new channel, Solaris will delete the one that was created during the first time setup should it still exist."""
+
+    perm = lightbulb.utils.permissions_in(
+        value,
+        await ctx.bot.rest.fetch_member(
+            ctx.get_guild().id,
+            841547626772168704
+        ),
+        True
+    )
+    
     if not isinstance(value, hikari.GuildTextChannel):
         await channel.send(f"{bot.cross} The log channel must be a Discord text channel in this server.")
-    elif not value.permissions_for(channel.guild.me).send_messages:
+    elif not perm.SEND_MESSAGES:
         await channel.send(
             f"{bot.cross} The given channel can not be used as the log channel as Solaris can not send messages to it."
         )
     else:
-        await bot.db.execute("UPDATE system SET LogChannelID = ? WHERE GuildID = ?", value.id, channel.guild_id)
+        await ctx.bot.db.execute("UPDATE system SET LogChannelID = ? WHERE GuildID = ?", value.id, channel.guild_id)
         await channel.send(f"{bot.tick} The log channel has been set to {value.mention}.")
         await value.send(
             (
@@ -60,59 +70,69 @@ async def system__logchannel(bot, channel, value):
         )
 
         if (
-            channel.guild.me.guild_permissions.manage_channels
-            and (dlc := await retrieve.system__defaultlogchannel(bot, channel.guild_id)) is not None
+            perm.MANAGE_CHANNELS
+            and (dlc := await retrieve.system__defaultlogchannel(ctx.bot, channel.guild_id)) is not None
         ):
             await dlc.delete(reason="Default log channel was overridden.")
             await value.send(f"{bot.info} The default log channel has been deleted, as it is no longer required.")
-########
 
 
-#######
-async def system__adminrole(bot, channel, value):
+async def system__adminrole(ctx, channel, value):
     """The admin role
     The role used to denote which members can configure Solaris. Alongside server administrators, only members with this role can use any of Solaris' configuration commands. Upon selecting a new channel, Solaris will delete the one that was created during the first time setup should it still exist."""
+
+    bot_user = await ctx.bot.rest.fetch_member(ctx.get_guild().id, 841547626772168704)
+    perm = lightbulb.utils.permissions_for(bot_user)
+    
     if not isinstance(value, hikari.Role):
         await channel.send(f"{bot.cross} The admin role must be a Discord role in this server.")
     elif value.name == "@everyone":
         await channel.send(f"{bot.cross} The everyone role can not be used as the admin role.")
     elif value.name == "@here":
         await channel.send(f"{bot.cross} The here role can not be used as the admin role.")
-    elif value.position > channel.guild.me.top_role.position:
+    elif value.position > bot_user.get_top_role.position:
         await channel.send(
             f"{bot.cross} The given role can not be used as the admin role as it is above Solaris' top role in the role hierarchy."
         )
     else:
-        await bot.db.execute("UPDATE system SET AdminRoleID = ? WHERE GuildID = ?", value.id, channel.guild_id)
+        await ctx.bot.db.execute("UPDATE system SET AdminRoleID = ? WHERE GuildID = ?", value.id, channel.guild_id)
         await channel.send(f"{bot.tick} The admin role has been set to {value.mention}.")
-        lc = await retrieve.log_channel(bot, channel.guild_id)
+        lc = await retrieve.log_channel(ctx.bot, channel.guild_id)
         await lc.send(f"{bot.info} The admin role has been set to {value.mention}.")
 
         if (
-            channel.guild.me.guild_permissions.manage_roles
-            and (dar := await retrieve.system__defaultadminrole(bot, channel.guild_id)) is not None
+            perm.MANAGE_ROLES
+            and (dar := await retrieve.system__defaultadminrole(ctx.bot, channel.guild_id)) is not None
         ):
             await dar.delete(reason="Default admin role was overridden.")
-            lc = await retrieve.log_channel(bot, channel.guild_id)
+            lc = await retrieve.log_channel(ctx.bot, channel.guild_id)
             await lc.send(f"{bot.info} The default admin role has been deleted, as it is no longer required.")
-########
 
 
-async def gateway__active(bot, channel, value):
-    await bot.db.execute("UPDATE gateway SET Active = ? WHERE GuildID = ?", value, channel.guild_id)
+async def gateway__active(ctx, channel, value):
+    await ctx.bot.db.execute("UPDATE gateway SET Active = ? WHERE GuildID = ?", value, channel.guild_id)
 
 
-########
-async def gateway__ruleschannel(bot, channel, value):
+async def gateway__ruleschannel(ctx, channel, value):
     """The rules channel
     The channel that the gate message will be sent to when the module is activated. This channel should contain the server rules, and should be the first channel new members see when they enter the server."""
-    if await retrieve.gateway__active(bot, channel.guild_id):
+
+    perm = lightbulb.utils.permissions_in(
+        value,
+        await ctx.bot.rest.fetch_member(
+            ctx.get_guild().id,
+            841547626772168704
+        ),
+        True
+    )
+
+    if await retrieve.gateway__active(ctx.bot, channel.guild_id):
         await channel.send(f"{bot.cross} This can not be done as the gateway module is currently active.")
     elif not isinstance(value, hikari.GuildTextChannel):
         await channel.send(f"{bot.cross} The rules channel must be a Discord text channel in this server.")
     elif not (
-        value.permissions_for(channel.guild.me).send_messages
-        and value.permissions_for(channel.guild.me).manage_messages
+        perm.SEND_MESSAGES
+        and perm.MANAGE_MESSAGES
     ):
         await channel.send(
             f"{bot.cross} The given channel can not be used as the rules channel as Solaris can not send messages to it or manage exising messages there."
@@ -122,16 +142,15 @@ async def gateway__ruleschannel(bot, channel, value):
         await channel.send(
             f"{bot.tick} The rules channel has been set to {value.mention}. Make sure this is the first channel new members see when they join."
         )
-        lc = await retrieve.log_channel(bot, channel.guild_id)
+        lc = await retrieve.log_channel(ctx.bot, channel.guild_id)
         await lc.send(f"{bot.info} The rules channel has been set to {value.mention}.")
-########
 
 
-async def gateway__gatemessage(bot, channel, value):
+async def gateway__gatemessage(ctx, channel, value):
     if value is not None:
-        await bot.db.execute("UPDATE gateway SET GateMessageID = ? WHERE GuildID = ?", value.id, channel.guild_id)
+        await ctx.bot.db.execute("UPDATE gateway SET GateMessageID = ? WHERE GuildID = ?", value.id, channel.guild_id)
     else:
-        await bot.db.execute("UPDATE gateway SET GateMessageID = NULL WHERE GuildID = ?", channel.guild_id)
+        await ctx.bot.db.execute("UPDATE gateway SET GateMessageID = NULL WHERE GuildID = ?", channel.guild_id)
 
 
 ########

@@ -9,7 +9,7 @@ class Ready:
 
     def up(self, extension):
         setattr(self, qn := extension.name.lower(), True)
-        print(f"  • `{qn}` extension ready.")
+        print(f"   • `{qn}` extension ready.")
 
     @property
     def ok(self):

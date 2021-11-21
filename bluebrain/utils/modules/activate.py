@@ -4,7 +4,7 @@ from bluebrain.utils.modules import retrieve
 
 
 async def gateway(ctx):
-    async with ctx.typing():
+    async with ctx.get_channel().trigger_typing():
         active, rc_id, br_id, gt = (
             await ctx.bot.db.record(
                 "SELECT Active, RulesChannelID, BlockingRoleID, GateText FROM gateway WHERE GuildID = ?", ctx.get_guild().id

@@ -10,11 +10,11 @@ async def system__prefix(bot, guild_id):
 
 
 async def system__defaultlogchannel(bot, guild_id):
-    return await bot.rest.fetch_channel(await bot.db.field("SELECT DefaultLogChannelID FROM system WHERE GuildID = ?", guild_id))
+    return bot.cache.get_channel(await bot.db.field("SELECT DefaultLogChannelID FROM system WHERE GuildID = ?", guild_id))
 
 
 async def system__logchannel(bot, guild_id):
-    return await bot.rest.fetch_channel(await bot.db.field("SELECT LogChannelID FROM system WHERE GuildID = ?", guild_id))
+    return bot.cache.get_channel(await bot.db.field("SELECT LogChannelID FROM system WHERE GuildID = ?", guild_id))
 
 
 async def log_channel(bot, guild_id):
@@ -35,7 +35,7 @@ async def gateway__active(bot, guild_id):
 
 
 async def gateway__ruleschannel(bot, guild_id):
-    return await bot.rest.fetch_channel(await bot.db.field("SELECT RulesChannelID FROM gateway WHERE GuildID = ?", guild_id))
+    return bot.cache.get_channel(await bot.db.field("SELECT RulesChannelID FROM gateway WHERE GuildID = ?", guild_id))
 
 
 async def gateway__gatemessage(bot, guild_id):
@@ -67,11 +67,11 @@ async def gateway__exceptionroles(bot, guild_id):
 
 
 async def gateway__welcomechannel(bot, guild_id):
-    return await bot.rest.fetch_channel(await bot.db.field("SELECT WelcomeChannelID FROM gateway WHERE GuildID = ?", guild_id))
+    return bot.cache.get_channel(await bot.db.field("SELECT WelcomeChannelID FROM gateway WHERE GuildID = ?", guild_id))
 
 
 async def gateway__goodbyechannel(bot, guild_id):
-    return await bot.rest.fetch_channel(await bot.db.field("SELECT GoodbyeChannelID FROM gateway WHERE GuildID = ?", guild_id))
+    return bot.cache.get_channel(await bot.db.field("SELECT GoodbyeChannelID FROM gateway WHERE GuildID = ?", guild_id))
 
 
 async def gateway__timeout(bot, guild_id):
