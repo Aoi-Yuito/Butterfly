@@ -427,14 +427,14 @@ async def gateway__goodbyetext(ctx, channel, value):
         lc = await retrieve.log_channel(ctx.bot, channel.guild_id)
         await lc.send(f"{bot.info} The goodbye message text has been set to the following: {value}")
 
-#####
-async def gateway__welcomebottext(bot, channel, value):
+
+async def gateway__welcomebottext(ctx, channel, value):
     """The welcome message text for bots
     The message sent to the welcome channel (if set) when a bot joins the server. This message can be up to 500 characters in length. If no message is set, a default will be used instead. The message can be reset at any time by passing no arguments to the command below."""
     if value is None:
-        await bot.db.execute("UPDATE gateway SET WelcomeBotText = NULL WHERE GuildID = ?", channel.guild.id)
+        await ctx.bot.db.execute("UPDATE gateway SET WelcomeBotText = NULL WHERE GuildID = ?", channel.guild_id)
         await channel.send(f"{bot.tick} The welcome bot message text has been reset.")
-        lc = await retrieve.log_channel(bot, channel.guild)
+        lc = await retrieve.log_channel(ctx.bot, channel.guild_id)
         await lc.send(f"{bot.info} The welcome bot message text has been reset.")
     elif not isinstance(value, str):
         await channel.send(f"{bot.cross} The welcome bot message text must be a string.")
@@ -445,19 +445,19 @@ async def gateway__welcomebottext(bot, channel, value):
     elif not string.text_is_formattible(value):
         await channel.send(f"{bot.cross} The given message is not formattible (probably unclosed brace).")
     else:
-        await bot.db.execute("UPDATE gateway SET WelcomeBotText = ? WHERE GuildID = ?", value, channel.guild.id)
+        await ctx.bot.db.execute("UPDATE gateway SET WelcomeBotText = ? WHERE GuildID = ?", value, channel.guild_id)
         await channel.send(f"{bot.tick} The welcome bot message text has been set.")
-        lc = await retrieve.log_channel(bot, channel.guild)
+        lc = await retrieve.log_channel(ctx.bot, channel.guild_id)
         await lc.send(f"{bot.info} The welcome bot message text has been set to the following: {value}")
-####
 
-async def gateway__goodbyebottext(bot, channel, value):
+
+async def gateway__goodbyebottext(ctx, channel, value):
     """The goodbye message text for bots
     The message sent to the goodbye channel (if set) when a bot leaves the server. This message can be up to 500 characters in length. If no message is set, a default will be used instead. The message can be reset at any time by passing no arguments to the command below."""
     if value is None:
-        await bot.db.execute("UPDATE gateway SET GoodbyeBotText = NULL WHERE GuildID = ?", channel.guild.id)
+        await ctx.bot.db.execute("UPDATE gateway SET GoodbyeBotText = NULL WHERE GuildID = ?", channel.guild_id)
         await channel.send(f"{bot.tick} The goodbye bot message text has been reset.")
-        lc = await retrieve.log_channel(bot, channel.guild)
+        lc = await retrieve.log_channel(ctx.bot, channel.guild_id)
         await lc.send(f"{bot.info} The goodbye bot message text has been reset.")
     elif not isinstance(value, str):
         await channel.send(f"{bot.cross} The goodbye bot message text must be a string.")
@@ -468,40 +468,40 @@ async def gateway__goodbyebottext(bot, channel, value):
     elif not string.text_is_formattible(value):
         await channel.send(f"{bot.cross} The given message is not formattible (probably unclosed brace).")
     else:
-        await bot.db.execute("UPDATE gateway SET GoodbyeBotText = ? WHERE GuildID = ?", value, channel.guild.id)
+        await ctx.bot.db.execute("UPDATE gateway SET GoodbyeBotText = ? WHERE GuildID = ?", value, channel.guild_id)
         await channel.send(f"{bot.tick} The goodbye bot message text has been set.")
-        lc = await retrieve.log_channel(bot, channel.guild)
+        lc = await retrieve.log_channel(ctx.bot, channel.guild_id)
         await lc.send(f"{bot.info} The goodbye bot message text has been set to the following: {value}")
 
 
-async def warn__warnrole(bot, channel, value):
+async def warn__warnrole(ctx, channel, value):
     """The warn role
     The role that members need to have in order to warn other members, typically a moderator or staff role. If this is not set, only server administrators will be able to warn members. This can be reset at any time by passing no arguments to the command below."""
     if value is None:
-        await bot.db.execute("UPDATE warn SET WarnRoleID = NULL WHERE GuildID = ?", channel.guild.id)
+        await ctx.bot.db.execute("UPDATE warn SET WarnRoleID = NULL WHERE GuildID = ?", channel.guild_id)
         await channel.send(f"{bot.tick} The warn role has been reset.")
-        lc = await retrieve.log_channel(bot, channel.guild)
+        lc = await retrieve.log_channel(ctx.bot, channel.guild_id)
         await lc.send(f"{bot.info} The warn role has been reset.")
-    elif not isinstance(value, discord.Role):
+    elif not isinstance(value, hikari.Role):
         await channel.send(f"{bot.cross} The warn role must be a Discord role in this server.")
     elif value.name == "@everyone":
         await channel.send(f"{bot.cross} The everyone role can not be used as the warn role.")
     elif value.name == "@here":
         await channel.send(f"{bot.cross} The here role can not be used as the warn role.")
     else:
-        await bot.db.execute("UPDATE warn SET WarnRoleID = ? WHERE GuildID = ?", value.id, channel.guild.id)
+        await ctx.bot.db.execute("UPDATE warn SET WarnRoleID = ? WHERE GuildID = ?", value.id, channel.guild_id)
         await channel.send(f"{bot.tick} The warn role has been set to {value.mention}.")
-        lc = await retrieve.log_channel(bot, channel.guild)
+        lc = await retrieve.log_channel(ctx.bot, channel.guild_id)
         await lc.send(f"{bot.info} The warn role has been set to {value.mention}.")
 
 
-async def warn__maxpoints(bot, channel, value):
+async def warn__maxpoints(ctx, channel, value):
     """The max points total
     The number of points a member needs in total to get banned from a warning. This can be set to any value between 5 and 99 inclusive. If no value is set, the default is 12. This can be reset at any time by passing no arguments to the command below."""
     if value is None:
-        await bot.db.execute("UPDATE warn SET MaxPoints = NULL WHERE GuildID = ?", channel.guild.id)
+        await ctx.bot.db.execute("UPDATE warn SET MaxPoints = NULL WHERE GuildID = ?", channel.guild_id)
         await channel.send(f"{bot.tick} The max points total has been reset.")
-        lc = await retrieve.log_channel(bot, channel.guild)
+        lc = await retrieve.log_channel(ctx.bot, channel.guild_id)
         await lc.send(f"{bot.info} The max points total has been reset.")
     elif not isinstance(value, int):
         await channel.send(f"{bot.cross} The max points total must be an integer number.")
@@ -510,21 +510,21 @@ async def warn__maxpoints(bot, channel, value):
             f"{bot.cross} The max points total must be between {MIN_POINTS} and {MAX_POINTS} inclusive."
         )
     else:
-        await bot.db.execute("UPDATE warn SET MaxPoints = ? WHERE GuildID = ?", value, channel.guild.id)
+        await ctx.bot.db.execute("UPDATE warn SET MaxPoints = ? WHERE GuildID = ?", value, channel.guild_id)
         await channel.send(
             f"{bot.tick} The max points total has been set to {value}. Members currently at or exceeding this total will not be retroactively banned."
         )
-        lc = await retrieve.log_channel(bot, channel.guild)
+        lc = await retrieve.log_channel(ctx.bot, channel.guild_id)
         await lc.send(f"{bot.info} The max points total has been set to {value}.")
 
 
-async def warn__maxstrikes(bot, channel, value):
+async def warn__maxstrikes(ctx, channel, value):
     """The max strikes per offence
     The number of times a member needs to be warned of a particular offence to get banned from a warning. This is per offence, and not a total number of strikes. This can be set to any value between 1 and 9 inclusive. If no value is set, the default is 3. This can be reset at any time by passing no arguments to the command below."""
     if value is None:
-        await bot.db.execute("UPDATE warn SET MaxStrikes = NULL WHERE GuildID = ?", channel.guild.id)
+        await ctx.bot.db.execute("UPDATE warn SET MaxStrikes = NULL WHERE GuildID = ?", channel.guild_id)
         await channel.send(f"{bot.tick} The max strikes per offence has been reset.")
-        lc = await retrieve.log_channel(bot, channel.guild)
+        lc = await retrieve.log_channel(ctx.bot, channel.guild_id)
         await lc.send(f"{bot.info} The max strikes per offence has been reset.")
     elif not isinstance(value, int):
         await channel.send(f"{bot.cross} The max strikes per offence must be an integer number.")
@@ -533,15 +533,15 @@ async def warn__maxstrikes(bot, channel, value):
             f"{bot.cross} The max strikes per offence must be between {MIN_STRIKES} and {MAX_STRIKES} inclusive."
         )
     else:
-        await bot.db.execute("UPDATE warn SET MaxStrikes = ? WHERE GuildID = ?", value, channel.guild.id)
+        await ctx.bot.db.execute("UPDATE warn SET MaxStrikes = ? WHERE GuildID = ?", value, channel.guild_id)
         await channel.send(
             f"{bot.tick} The max strikes per offence has been set to {value}. Members currently at or exceeding this total will not be retroactively banned."
         )
-        lc = await retrieve.log_channel(bot, channel.guild)
+        lc = await retrieve.log_channel(ctx.bot, channel.guild_id)
         await lc.send(f"{bot.info} The max strikes per offence has been set to {value}.")
 
 
-async def warn__retroupdates(bot, channel, value):
+async def warn__retroupdates(ctx, channel, value):
     """Retroactive updates
     Whether to update already instated warns that did not receive a points override with new points values when warn types are modified with the `warntype edit` command. This can be set to either 0 (OFF) or 1 (ON). Defaults to 0 (OFF)."""
     if not isinstance(value, int):
@@ -549,8 +549,8 @@ async def warn__retroupdates(bot, channel, value):
     elif not 0 <= value <= 1:
         await channel.send(f"{bot.cross} The retroactive updates toggle must be either 0 or 1.")
     else:
-        await bot.db.execute("UPDATE warn SET RetroUpdates = ? WHERE GuildID = ?", value, channel.guild.id)
+        await ctx.bot.db.execute("UPDATE warn SET RetroUpdates = ? WHERE GuildID = ?", value, channel.guild_id)
         await channel.send(f"{bot.tick} The retroactive updates toggle has been set to {value}.")
-        lc = await retrieve.log_channel(bot, channel.guild)
+        lc = await retrieve.log_channel(ctx.bot, channel.guild_id)
         await lc.send(f"{bot.info} The retroactive updates toggle has been set to {value}.")
 
