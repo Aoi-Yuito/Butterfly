@@ -23,7 +23,7 @@ async def log_channel(bot, guild_id):
 
 
 async def system__defaultadminrole(bot, guild_id):
-    return guild.get_role(await bot.db.field("SELECT DefaultAdminRoleID FROM system WHERE GuildID = ?", guild_id))
+    return bot.cache.get_role(await bot.db.field("SELECT DefaultAdminRoleID FROM system WHERE GuildID = ?", guild_id))
 
 
 async def system__adminrole(bot, guild_id):
@@ -49,7 +49,7 @@ async def gateway__gatemessage(bot, guild_id):
 
 
 async def gateway__blockingrole(bot, guild_id):
-    return guild.get_role(await bot.db.field("SELECT BlockingRoleID FROM gateway WHERE GuildID = ?", guild_id))
+    return bot.cache.get_role(await bot.db.field("SELECT BlockingRoleID FROM gateway WHERE GuildID = ?", guild_id))
 
 
 async def gateway__memberroles(bot, guild_id):
@@ -99,7 +99,7 @@ async def gateway__goodbyebottext(bot, guild_id):
 
 
 async def warn__warnrole(bot, guild_id):
-    return guild.get_role(await bot.db.field("SELECT WarnRoleID FROM warn WHERE GuildID = ?", guild_id))
+    return bot.cache.get_role(await bot.db.field("SELECT WarnRoleID FROM warn WHERE GuildID = ?", guild_id))
 
 
 async def warn__maxpoints(bot, guild_id):

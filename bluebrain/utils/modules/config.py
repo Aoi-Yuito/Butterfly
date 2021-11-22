@@ -138,7 +138,7 @@ async def gateway__ruleschannel(ctx, channel, value):
             f"{bot.cross} The given channel can not be used as the rules channel as Solaris can not send messages to it or manage exising messages there."
         )
     else:
-        await bot.db.execute("UPDATE gateway SET RulesChannelID = ? WHERE GuildID = ?", value.id, channel.guild_id)
+        await ctx.bot.db.execute("UPDATE gateway SET RulesChannelID = ? WHERE GuildID = ?", value.id, channel.guild_id)
         await channel.send(
             f"{bot.tick} The rules channel has been set to {value.mention}. Make sure this is the first channel new members see when they join."
         )
@@ -153,11 +153,13 @@ async def gateway__gatemessage(ctx, channel, value):
         await ctx.bot.db.execute("UPDATE gateway SET GateMessageID = NULL WHERE GuildID = ?", channel.guild_id)
 
 
-########
-async def gateway__blockingrole(bot, channel, value):
+async def gateway__blockingrole(ctx, channel, value):
     """The blocking role
     The role that Solaris will give new members upon entering the server, and remove when they accept the server rules. This role should prohibit access to all but the rules channel, or all but a read-only category."""
-    if await retrieve.gateway__active(bot, channel.guild_id):
+
+    bot_user = await ctx.bot.rest.fetch_member(ctx.get_guild().id, 841547626772168704)
+
+    if await retrieve.gateway__active(ctx.bot, channel.guild_id):
         await channel.send(f"{bot.cross} This can not be done as the gateway module is currently active.")
     elif not isinstance(value, hikari.Role):
         await channel.send(f"{bot.cross} The blocking role must be a Discord role in this server.")
@@ -165,32 +167,32 @@ async def gateway__blockingrole(bot, channel, value):
         await channel.send(f"{bot.cross} The everyone role can not be used as the blocking role.")
     elif value.name == "@here":
         await channel.send(f"{bot.cross} The here role can not be used as the blocking role.")
-    elif value.position >= channel.guild.me.top_role.position:
+    elif value.position >= bot_user.get_top_role.position:
         await channel.send(
             f"{bot.cross} The given role can not be used as the blocking role as it is above Solaris' top role in the role hierarchy."
         )
     else:
-        await bot.db.execute("UPDATE gateway SET BlockingRoleID = ? WHERE GuildID = ?", value.id, channel.guild_id)
+        await ctx.bot.db.execute("UPDATE gateway SET BlockingRoleID = ? WHERE GuildID = ?", value.id, channel.guild_id)
         await channel.send(
             f"{bot.tick} The blocking role has been set to {value.mention}. Make sure the permissions are set correctly."
         )
-        lc = await retrieve.log_channel(bot, channel.guild_id)
+        lc = await retrieve.log_channel(ctx.bot, channel.guild_id)
         await lc.send(f"{bot.info} The blocking role has been set to {value.mention}.")
-########
 
 
-########
-async def gateway__memberroles(bot, channel, values):
+async def gateway__memberroles(ctx, channel, values):
     """The member roles
     The role(s) that Solaris will give members upon accepting the server rules. This is optional, but could be useful if you want members to have specific roles when they join, for example for a levelling system, or to automatically opt them in to server announcements. You can set up to 3 member roles. The roles can be unset at any time by passing no arguments to the command below."""
     values = [values] if not isinstance(values, list) else values
 
-    if (br := await retrieve.gateway__blockingrole(bot, channel.guild_id)) is None:
+    bot_user = await ctx.bot.rest.fetch_member(ctx.get_guild().id, 841547626772168704)
+
+    if (br := await retrieve.gateway__blockingrole(ctx.bot, channel.guild_id)) is None:
         await channel.send(f"{bot.cross} You need to set the blocking role before you can set the member roles.")
     elif values[0] is None:
-        await bot.db.execute("UPDATE gateway SET MemberRoleIDs = NULL WHERE GuildID = ?", channel.guild_id)
+        await ctx.bot.db.execute("UPDATE gateway SET MemberRoleIDs = NULL WHERE GuildID = ?", channel.guild_id)
         await channel.send(f"{bot.tick} The member roles have been reset.")
-        lc = await retrieve.log_channel(bot, channel.guild_id)
+        lc = await retrieve.log_channel(ctx.bot, channel.guild_id)
         await lc.send(f"{bot.info} The member roles have been reset.")
     elif len(values) > MAX_MEMBER_ROLES:
         await channel.send(f"{bot.cross} You can only set up to {MAX_MEMBER_ROLES} member roles.")
@@ -202,12 +204,12 @@ async def gateway__memberroles(bot, channel, values):
         await channel.send(f"{bot.cross} The here role can not be used as a member role.")
     elif any(v == br for v in values):
         await channel.send(f"{bot.cross} No member roles can be the same as the blocking role.")
-    elif any(v.position > channel.guild.me.top_role.position for v in values):
+    elif any(v.position > bot_user.get_top_role.position for v in values):
         await channel.send(
             f"{bot.cross} One or more given roles can not be used as member roles as they are above Solaris' top role in the role hierarchy."
         )
     else:
-        await bot.db.execute(
+        await ctx.bot.db.execute(
             "UPDATE gateway SET MemberRoleIDs = ? WHERE GuildID = ?",
             ",".join(f"{v.id}" for v in values),
             channel.guild_id,
@@ -215,22 +217,21 @@ async def gateway__memberroles(bot, channel, values):
         await channel.send(
             f"{bot.tick} The member roles have been set to {string.list_of([v.mention for v in values])}. Make sure the permissions are set correctly."
         )
-        lc = await retrieve.log_channel(bot, channel.guild_id)
+        lc = await retrieve.log_channel(ctx.bot, channel.guild_id)
         await lc.send(f"{bot.info} The member roles have been set to {string.list_of([v.mention for v in values])}.")
-########
 
 
-async def gateway__exceptionroles(bot, channel, values):
+async def gateway__exceptionroles(ctx, channel, values):
     """The exception roles
     The role(s) that, when given to a new member before they accept the server rules, will grant them access to the server. This is optional, but could be useful if you want members to have access upon receiving a premium role, for example, one given by the Patreon bot. You can set up to 3 exception roles. The roles can be unset at any time by passing no arguments to the command below."""
     values = [values] if not isinstance(values, list) else values
 
-    if (br := await retrieve.gateway__blockingrole(bot, channel.guild)) is None:
+    if (br := await retrieve.gateway__blockingrole(ctx.bot, channel.guild_id)) is None:
         await channel.send(f"{bot.cross} You need to set the blocking role before you can set the exception roles.")
     elif values[0] is None:
-        await bot.db.execute("UPDATE gateway SET ExceptionRoleIDs = NULL WHERE GuildID = ?", channel.guild.id)
+        await ctx.bot.db.execute("UPDATE gateway SET ExceptionRoleIDs = NULL WHERE GuildID = ?", channel.guild_id)
         await channel.send(f"{bot.tick} The exception roles have been reset.")
-        lc = await retrieve.log_channel(bot, channel.guild)
+        lc = await retrieve.log_channel(ctx.bot, channel.guild_id)
         await lc.send(f"{bot.info} The exception roles have been reset.")
     elif len(values) > MAX_EXCEPTION_ROLES:
         await channel.send(f"{bot.cross} You can only set up to {MAX_EXCEPTION_ROLES} exception roles.")
@@ -243,27 +244,37 @@ async def gateway__exceptionroles(bot, channel, values):
     elif any(v == br for v in values):
         await channel.send(f"{bot.cross} No exception roles can be the same as the blocking role.")
     else:
-        await bot.db.execute(
+        await ctx.bot.db.execute(
             "UPDATE gateway SET ExceptionRoleIDs = ? WHERE GuildID = ?",
             ",".join(f"{v.id}" for v in values),
-            channel.guild.id,
+            channel.guild_id,
         )
         await channel.send(
             f"{bot.tick} The exception roles have been set to {string.list_of([v.mention for v in values])}."
         )
-        lc = await retrieve.log_channel(bot, channel.guild)
+        lc = await retrieve.log_channel(ctx.bot, channel.guild_id)
         await lc.send(
             f"{bot.info} The exception roles have been set to {string.list_of([v.mention for v in values])}."
         )
 
 
-async def gateway__welcomechannel(bot, channel, value):
+async def gateway__welcomechannel(ctx, channel, value):
     """The welcome channel
     The channel that Solaris will send welcome messages to upon a member accepting the server rules. If no channel is set, Solaris will not send welcome messages. The channel can be unset at any time by passing no arguments to the command below. Note that Solaris does not send welcome messages in all situations, such as if the member received an exception role."""
-    if (rc := await retrieve.gateway__ruleschannel(bot, channel.guild)) is None:
+
+    perm = lightbulb.utils.permissions_in(
+        value,
+        await ctx.bot.rest.fetch_member(
+            ctx.get_guild().id,
+            841547626772168704
+        ),
+        True
+    )
+
+    if (rc := await retrieve.gateway__ruleschannel(ctx.bot, channel.guild_id)) is None:
         await channel.send(f"{bot.cross} You need to set the rules channel before you can set the welcome channel.")
     elif value is None:
-        await bot.db.execute("UPDATE gateway SET WelcomeChannelID = NULL WHERE GuildID = ?", channel.guild.id)
+        await ctx.bot.db.execute("UPDATE gateway SET WelcomeChannelID = NULL WHERE GuildID = ?", channel.guild_id)
         await channel.send(
             f"{bot.tick} The welcome channel has been reset. Solaris will stop sending welcome messages."
         )
@@ -273,51 +284,61 @@ async def gateway__welcomechannel(bot, channel, value):
         await channel.send(f"{bot.cross} The welcome channel must be a Discord text channel in this server.")
     elif value == rc:
         await channel.send(f"{bot.cross} The welcome channel can not be the same as the rules channel.")
-    elif not value.permissions_for(channel.guild.me).send_messages:
+    elif not perm.SEND_MESSAGES:
         await channel.send(
             f"{bot.cross} The given channel can not be used as the welcome channel as Solaris can not send messages to it."
         )
     else:
-        await bot.db.execute("UPDATE gateway SET WelcomeChannelID = ? WHERE GuildID = ?", value.id, channel.guild.id)
+        await ctx.bot.db.execute("UPDATE gateway SET WelcomeChannelID = ? WHERE GuildID = ?", value.id, channel.guild_id)
         await channel.send(f"{bot.tick} The welcome channel has been set to {value.mention}.")
-        lc = await retrieve.log_channel(bot, channel.guild)
+        lc = await retrieve.log_channel(ctx.bot, channel.guild_id)
         await lc.send(f"{bot.info} The welcome channel has been set to {value.mention}.")
 
 
-async def gateway__goodbyechannel(bot, channel, value):
+async def gateway__goodbyechannel(ctx, channel, value):
     """The goodbye channel
     The channel that Solaris will send goodbye messages to upon a member leaving the server. If no channel is set, Solaris will not send goodbye messages. The channel can be unset at any time by passing no arguments to the command below. Note that Solaris will only send goodbye messages for members who have accepted the server rules, or members who were in the server before the module was activated."""
-    if (rc := await retrieve.gateway__ruleschannel(bot, channel.guild)) is None:
+
+    perm = lightbulb.utils.permissions_in(
+        value,
+        await ctx.bot.rest.fetch_member(
+            ctx.get_guild().id,
+            841547626772168704
+        ),
+        True
+    )
+
+    if (rc := await retrieve.gateway__ruleschannel(ctx.bot, channel.guild_id)) is None:
         await channel.send(f"{bot.cross} You need to set the rules channel before you can set the goodbye channel.")
     elif value is None:
-        await bot.db.execute("UPDATE gateway SET GoodbyeChannelID = NULL WHERE GuildID = ?", channel.guild.id)
+        await ctx.bot.db.execute("UPDATE gateway SET GoodbyeChannelID = NULL WHERE GuildID = ?", channel.guild_id)
         await channel.send(
             f"{bot.tick} The goodbye channel has been reset. Solaris will stop sending goodbye messages."
         )
-        lc = await retrieve.log_channel(bot, channel.guild)
+        lc = await retrieve.log_channel(ctx.bot, channel.guild_id)
         await lc.send(f"{bot.info} The goodbye channel has been reset.")
     elif not isinstance(value, discord.TextChannel):
         await channel.send(f"{bot.cross} The goodbye channel must be a Discord text channel in this server.")
     elif value == rc:
         await channel.send(f"{bot.cross} The goodbye channel can not be the same as the rules channel.")
-    elif not value.permissions_for(channel.guild.me).send_messages:
+    elif not perm.SEND_MESSAGES:
         await channel.send(
             f"{bot.cross} The given channel can not be used as the goodbye channel as Solaris can not send messages to it."
         )
     else:
-        await bot.db.execute("UPDATE gateway SET GoodbyeChannelID = ? WHERE GuildID = ?", value.id, channel.guild.id)
+        await ctx.bot.db.execute("UPDATE gateway SET GoodbyeChannelID = ? WHERE GuildID = ?", value.id, channel.guild_id)
         await channel.send(f"{bot.tick} The goodbye channel has been set to {value.mention}.")
-        lc = await retrieve.log_channel(bot, channel.guild)
+        lc = await retrieve.log_channel(ctx.bot, channel.guild_id)
         await lc.send(f"{bot.info} The goodbye channel has been set to {value.mention}.")
 
 
-async def gateway__timeout(bot, channel, value):
+async def gateway__timeout(ctx, channel, value):
     """The gateway timeout
     The amount of time Solaris gives new members to react to the gate message before being kicked. This is set in minutes, and can be set to any value between 1 and 60 inclusive. If no timeout is set, the default is 5 minutes. This can be reset at any time by passing no arguments to the command below."""
     if value is None:
-        await bot.db.execute("UPDATE gateway SET Timeout = NULL WHERE GuildID = ?", channel.guild.id)
+        await ctx.bot.db.execute("UPDATE gateway SET Timeout = NULL WHERE GuildID = ?", channel.guild_id)
         await channel.send(f"{bot.tick} The timeout has been reset.")
-        lc = await retrieve.log_channel(bot, channel.guild)
+        lc = await retrieve.log_channel(ctx.bot, channel.guild_id)
         await lc.send(f"{bot.info} The timeout has been reset.")
     elif not isinstance(value, int):
         await channel.send(f"{bot.cross} The timeout must be an integer number.")
@@ -326,23 +347,23 @@ async def gateway__timeout(bot, channel, value):
             f"{bot.cross} The timeout must be between {MIN_TIMEOUT} and {MAX_TIMEOUT} minutes inclusive."
         )
     else:
-        await bot.db.execute("UPDATE gateway SET Timeout = ? WHERE GuildID = ?", value * 60, channel.guild.id)
+        await ctx.bot.db.execute("UPDATE gateway SET Timeout = ? WHERE GuildID = ?", value * 60, channel.guild_id)
         await channel.send(
             f"{bot.tick} The timeout has been set to {value} minute(s). This will only apply to members who enter the server from now."
         )
-        lc = await retrieve.log_channel(bot, channel.guild)
+        lc = await retrieve.log_channel(ctx.bot, channel.guild_id)
         await lc.send(f"{bot.info} The timeout has been set to {value} minute(s).")
 
 
-async def gateway__gatetext(bot, channel, value):
+async def gateway__gatetext(ctx, channel, value):
     """The gate message text
     The message displayed in the gate message. The message can be up to 250 characters in length, and should **not** contain the server rules. If no message is set, a default will be used instead. The message can be reset at any time by passing no arguments to the command below."""
     if value is None:
-        await bot.db.execute("UPDATE gateway SET GateText = NULL WHERE GuildID = ?", channel.guild.id)
+        await ctx.bot.db.execute("UPDATE gateway SET GateText = NULL WHERE GuildID = ?", channel.guild_id)
         await channel.send(
             f"{bot.tick} The gate message text has been reset. The module needs to be restarted for these changes to take effect."
         )
-        lc = await retrieve.log_channel(bot, channel.guild)
+        lc = await retrieve.log_channel(ctx.bot, channel.guild_id)
         await lc.send(f"{bot.info} The gate message text has been reset.")
     elif not isinstance(value, str):
         await channel.send(f"{bot.cross} The gate message text must be a string.")
@@ -353,21 +374,21 @@ async def gateway__gatetext(bot, channel, value):
     elif not string.text_is_formattible(value):
         await channel.send(f"{bot.cross} The given message is not formattible (probably unclosed brace).")
     else:
-        await bot.db.execute("UPDATE gateway SET GateText = ? WHERE GuildID = ?", value, channel.guild.id)
+        await ctx.bot.db.execute("UPDATE gateway SET GateText = ? WHERE GuildID = ?", value, channel.guild_id)
         await channel.send(
             f"{bot.tick} The gate message text has been set. The module needs to be restarted for these changes to take effect."
         )
-        lc = await retrieve.log_channel(bot, channel.guild)
+        lc = await retrieve.log_channel(ctx.bot, channel.guild_id)
         await lc.send(f"{bot.info} The gate message text has been set to the following: {value}")
 
 
-async def gateway__welcometext(bot, channel, value):
+async def gateway__welcometext(ctx, channel, value):
     """The welcome message text
     The message sent to the welcome channel (if set) when a new member accepts the server rules. This message can be up to 1,000 characters in length. If no message is set, a default will be used instead. The message can be reset at any time by passing no arguments to the command below."""
     if value is None:
-        await bot.db.execute("UPDATE gateway SET WelcomeText = NULL WHERE GuildID = ?", channel.guild.id)
+        await ctx.bot.db.execute("UPDATE gateway SET WelcomeText = NULL WHERE GuildID = ?", channel.guild_id)
         await channel.send(f"{bot.tick} The welcome message text has been reset.")
-        lc = await retrieve.log_channel(bot, channel.guild)
+        lc = await retrieve.log_channel(ctx.bot, channel.guild_id)
         await lc.send(f"{bot.info} The welcome message text has been reset.")
     elif not isinstance(value, str):
         await channel.send(f"{bot.cross} The welcome message text must be a string.")
@@ -378,19 +399,19 @@ async def gateway__welcometext(bot, channel, value):
     elif not string.text_is_formattible(value):
         await channel.send(f"{bot.cross} The given message is not formattible (probably unclosed brace).")
     else:
-        await bot.db.execute("UPDATE gateway SET WelcomeText = ? WHERE GuildID = ?", value, channel.guild.id)
+        await ctx.bot.db.execute("UPDATE gateway SET WelcomeText = ? WHERE GuildID = ?", value, channel.guild_id)
         await channel.send(f"{bot.tick} The welcome message text has been set.")
-        lc = await retrieve.log_channel(bot, channel.guild)
+        lc = await retrieve.log_channel(ctx.bot, channel.guild_id)
         await lc.send(f"{bot.info} The welcome message text has been set to the following: {value}")
 
 
-async def gateway__goodbyetext(bot, channel, value):
+async def gateway__goodbyetext(ctx, channel, value):
     """The goodbye message text
     The message sent to the goodbye channel (if set) when a member leaves the server. This message can be up to 1,000 characters in length. If no message is set, a default will be used instead. The message can be reset at any time by passing no arguments to the command below."""
     if value is None:
-        await bot.db.execute("UPDATE gateway SET GoodbyeText = NULL WHERE GuildID = ?", channel.guild.id)
+        await ctx.bot.db.execute("UPDATE gateway SET GoodbyeText = NULL WHERE GuildID = ?", channel.guild_id)
         await channel.send(f"{bot.tick} The goodbye message text has been reset.")
-        lc = await retrieve.log_channel(bot, channel.guild)
+        lc = await retrieve.log_channel(ctx.bot, channel.guild_id)
         await lc.send(f"{bot.info} The goodbye message text has been reset.")
     elif not isinstance(value, str):
         await channel.send(f"{bot.cross} The goodbye message text must be a string.")
@@ -401,12 +422,12 @@ async def gateway__goodbyetext(bot, channel, value):
     elif not string.text_is_formattible(value):
         await channel.send(f"{bot.cross} The given message is not formattible (probably unclosed brace).")
     else:
-        await bot.db.execute("UPDATE gateway SET GoodbyeText = ? WHERE GuildID = ?", value, channel.guild.id)
+        await ctx.bot.db.execute("UPDATE gateway SET GoodbyeText = ? WHERE GuildID = ?", value, channel.guild_id)
         await channel.send(f"{bot.tick} The goodbye message text has been set.")
-        lc = await retrieve.log_channel(bot, channel.guild)
+        lc = await retrieve.log_channel(ctx.bot, channel.guild_id)
         await lc.send(f"{bot.info} The goodbye message text has been set to the following: {value}")
 
-
+#####
 async def gateway__welcomebottext(bot, channel, value):
     """The welcome message text for bots
     The message sent to the welcome channel (if set) when a bot joins the server. This message can be up to 500 characters in length. If no message is set, a default will be used instead. The message can be reset at any time by passing no arguments to the command below."""
@@ -428,7 +449,7 @@ async def gateway__welcomebottext(bot, channel, value):
         await channel.send(f"{bot.tick} The welcome bot message text has been set.")
         lc = await retrieve.log_channel(bot, channel.guild)
         await lc.send(f"{bot.info} The welcome bot message text has been set to the following: {value}")
-
+####
 
 async def gateway__goodbyebottext(bot, channel, value):
     """The goodbye message text for bots
