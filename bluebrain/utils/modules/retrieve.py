@@ -27,7 +27,7 @@ async def system__defaultadminrole(bot, guild_id):
 
 
 async def system__adminrole(bot, guild_id):
-    return guild.get_role(await bot.db.field("SELECT AdminRoleID FROM system WHERE GuildID = ?", guild_id))
+    return bot.cache.get_role(await bot.db.field("SELECT AdminRoleID FROM system WHERE GuildID = ?", guild_id))
 
 
 async def gateway__active(bot, guild_id):

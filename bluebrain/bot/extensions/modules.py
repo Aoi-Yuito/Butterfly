@@ -36,9 +36,9 @@ class SetupMenu(menu.SelectionMenu):
 
     async def start(self):
         r = await super().start()
-        print(r.emoji_name)
+        print(r)
 
-        if r.emoji_name == "confirm" and r.user_id == self.ctx.author.id:# and r.message_id == self.ctx.message.id:
+        if r == "confirm":
             pagemap = {
                 "header": "Setup Wizard",
                 "description": "Please wait... This should only take a few seconds.",
@@ -46,7 +46,7 @@ class SetupMenu(menu.SelectionMenu):
             }
             await self.switch(pagemap, remove_all_reactions=True)
             await self.run()
-        elif r == "cancel" and r.user_id == self.ctx.author.id:# and r.message_id == self.ctx.message.id:
+        elif r == "cancel":
             await self.stop()
 
     async def run(self):

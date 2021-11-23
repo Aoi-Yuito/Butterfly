@@ -40,15 +40,19 @@ class Selector:
     async def response(self):
         await self._serve()
 
+        def predicate(event: hikari.ReactionAddEvent) -> bool:
+            return event.user_id == self.menu.ctx.author.id and event.message_id == self.menu.message.id
+
         try:
-            reaction = await self.menu.bot.wait_for(hikari.ReactionAddEvent, timeout=self.timeout)
+            #reaction = await self.menu.bot.wait_for(hikari.ReactionAddEvent, timeout=self.timeout, predicate=lambda e: e.user_id == self.menu.ctx.author.id and e.message_id == self.menu.message.id)
+            reaction = await self.menu.bot.wait_for(hikari.ReactionAddEvent, timeout=self.timeout, predicate=predicate)
         except TimeoutError:
             await self.menu.timeout(chron.long_delta(timedelta(seconds=self.timeout)))
         else:
             if (r := reaction.emoji_name) == "exit" and reaction.user_id == self.menu.ctx.author.id and reaction.message_id == self.menu.message.id and self.auto_exit:
                 await self.menu.stop()
             else:
-                return reaction
+                return r
         
 
     def __repr__(self):
