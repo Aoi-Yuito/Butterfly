@@ -17,7 +17,7 @@ class Menu:
             await self.message.delete()
         else:
             await self.message.remove_all_reactions()
-            await self.message.edit(content=f"{(await self.bot.info)} The interactive menu was closed.", embed=None)
+            await self.message.edit(content=f"{self.bot.info} The interactive menu was closed.", embed=None)
 
         if self.delete_invoke_after:
             await self.ctx.message.delete()
@@ -28,7 +28,7 @@ class Menu:
         else:
             await self.message.remove_all_reactions()
             await self.message.edit(
-                content=f"{(await self.bot.info)} The interactive menu timed out as there was no user interation for {length}.",
+                content=f"{self.bot.info} The interactive menu timed out as there was no user interation for {length}.",
                 embed=None,
             )
 

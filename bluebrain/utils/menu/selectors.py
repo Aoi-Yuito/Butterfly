@@ -48,7 +48,7 @@ class Selector:
             if (r := reaction.emoji_name) == "exit" and reaction.user_id == self.menu.ctx.author.id and reaction.message_id == self.menu.message.id and self.auto_exit:
                 await self.menu.stop()
             else:
-                return r
+                return reaction
         
 
     def __repr__(self):
