@@ -49,7 +49,7 @@ class Selector:
         except TimeoutError:
             await self.menu.timeout(chron.long_delta(timedelta(seconds=self.timeout)))
         else:
-            if (r := reaction.emoji_name) == "exit" and reaction.user_id == self.menu.ctx.author.id and reaction.message_id == self.menu.message.id and self.auto_exit:
+            if (r := reaction.emoji_name) == "exit" and self.auto_exit:# and reaction.user_id == self.menu.ctx.author.id and reaction.message_id == self.menu.message.id:
                 await self.menu.stop()
             else:
                 return r
@@ -134,23 +134,26 @@ class NumericalSelector(Selector):
 
         if self.selection != self.last_selection:
             await self._serve()
+ 
+        def predicate(event: hikari.ReactionAddEvent) -> bool:
+            return event.user_id == self.menu.ctx.author.id and event.message_id == self.menu.message.id
 
         try:
-            reaction = await self.menu.bot.wait_for(hikari.ReactionAddEvent, timeout=self.timeout)
+            reaction = await self.menu.bot.wait_for(hikari.ReactionAddEvent, timeout=self.timeout, predicate=predicate)
         except TimeoutError:
             await self.menu.timeout(chron.long_delta(timedelta(seconds=self.timeout)))
         else:
-            if (r := reaction.emoji_name) == "exit" and reaction.user_id == self.menu.ctx.author.id and reaction.message_id == self.menu.message.id:
+            if (r := reaction.emoji_name) == "exit":# and reaction.user_id == self.menu.ctx.author.id and reaction.message_id == self.menu.message.id:
                 if self.auto_exit:
                     await self.menu.stop()
                 return
-            elif r == "stepback" and reaction.user_id == self.menu.ctx.author.id and reaction.message_id == self.menu.message.id:
+            elif r == "stepback":# and reaction.user_id == self.menu.ctx.author.id and reaction.message_id == self.menu.message.id:
                 self.page = 0
-            elif r == "pageback" and reaction.user_id == self.menu.ctx.author.id and reaction.message_id == self.menu.message.id:
+            elif r == "pageback":# and reaction.user_id == self.menu.ctx.author.id and reaction.message_id == self.menu.message.id:
                 self.page -= 1
-            elif r == "pagenext" and reaction.user_id == self.menu.ctx.author.id and reaction.message_id == self.menu.message.id:
+            elif r == "pagenext":# and reaction.user_id == self.menu.ctx.author.id and reaction.message_id == self.menu.message.id:
                 self.page += 1
-            elif r == "stepnext" and reaction.user_id == self.menu.ctx.author.id and reaction.message_id == self.menu.message.id:
+            elif r == "stepnext":# and reaction.user_id == self.menu.ctx.author.id and reaction.message_id == self.menu.message.id:
                 self.page = self.max_page
             else:
                 return self.pages[self.page][r]
@@ -228,22 +231,25 @@ class PageControls(Selector):
         if self.selection != self.last_selection:
             await self._serve()
 
+        def predicate(event: hikari.ReactionAddEvent) -> bool:
+            return event.user_id == self.menu.ctx.author.id and event.message_id == self.menu.message.id
+
         try:
-            reaction = await self.menu.bot.wait_for(hikari.ReactionAddEvent, timeout=self.timeout)
+            reaction = await self.menu.bot.wait_for(hikari.ReactionAddEvent, timeout=self.timeout, predicate=predicate)
         except TimeoutError:
             await self.menu.timeout(chron.long_delta(timedelta(seconds=self.timeout)))
         else:
-            if (r := reaction.emoji_name) == "exit" and reaction.user_id == self.menu.ctx.author.id and reaction.message_id == self.menu.message.id:
+            if (r := reaction.emoji_name) == "exit":# and reaction.user_id == self.menu.ctx.author.id and reaction.message_id == self.menu.message.id:
                 if self.auto_exit:
                     await self.menu.stop()
                 return
-            elif r == "stepback" and reaction.user_id == self.menu.ctx.author.id and reaction.message_id == self.menu.message.id:
+            elif r == "stepback":# and reaction.user_id == self.menu.ctx.author.id and reaction.message_id == self.menu.message.id:
                 self.page = 0
-            elif r == "pageback" and reaction.user_id == self.menu.ctx.author.id and reaction.message_id == self.menu.message.id:
+            elif r == "pageback":# and reaction.user_id == self.menu.ctx.author.id and reaction.message_id == self.menu.message.id:
                 self.page -= 1
-            elif r == "pagenext" and reaction.user_id == self.menu.ctx.author.id and reaction.message_id == self.menu.message.id:
+            elif r == "pagenext":# and reaction.user_id == self.menu.ctx.author.id and reaction.message_id == self.menu.message.id:
                 self.page += 1
-            elif r == "stepnext" and reaction.user_id == self.menu.ctx.author.id and reaction.message_id == self.menu.message.id:
+            elif r == "stepnext":# and reaction.user_id == self.menu.ctx.author.id and reaction.message_id == self.menu.message.id:
                 self.page = self.max_page
 
             await self.menu.switch(reaction.emoji_name, reaction.emoji_id)

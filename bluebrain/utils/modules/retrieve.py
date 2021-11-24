@@ -10,11 +10,17 @@ async def system__prefix(bot, guild_id):
 
 
 async def system__defaultlogchannel(bot, guild_id):
-    return bot.cache.get_guild_channel(await bot.db.field("SELECT DefaultLogChannelID FROM system WHERE GuildID = ?", guild_id))
+    try:
+        return bot.cache.get_guild_channel(await bot.db.field("SELECT DefaultLogChannelID FROM system WHERE GuildID = ?", guild_id))
+    except Exception:
+        return None
 
 
 async def system__logchannel(bot, guild_id):
-    return bot.cache.get_guild_channel(await bot.db.field("SELECT LogChannelID FROM system WHERE GuildID = ?", guild_id))
+    try:
+        return bot.cache.get_guild_channel(await bot.db.field("SELECT LogChannelID FROM system WHERE GuildID = ?", guild_id))
+    except Exception:
+        return None
 
 
 async def log_channel(bot, guild_id):
@@ -23,11 +29,17 @@ async def log_channel(bot, guild_id):
 
 
 async def system__defaultadminrole(bot, guild_id):
-    return bot.cache.get_role(await bot.db.field("SELECT DefaultAdminRoleID FROM system WHERE GuildID = ?", guild_id))
+    try:
+        return bot.cache.get_role(await bot.db.field("SELECT DefaultAdminRoleID FROM system WHERE GuildID = ?", guild_id))
+    except Exception:
+        return None
 
 
 async def system__adminrole(bot, guild_id):
-    return bot.cache.get_role(await bot.db.field("SELECT AdminRoleID FROM system WHERE GuildID = ?", guild_id))
+    try:
+        return bot.cache.get_role(await bot.db.field("SELECT AdminRoleID FROM system WHERE GuildID = ?", guild_id))
+    except Exception:
+        return None
 
 
 async def gateway__active(bot, guild_id):
@@ -35,7 +47,10 @@ async def gateway__active(bot, guild_id):
 
 
 async def gateway__ruleschannel(bot, guild_id):
-    return bot.cache.get_guild_channel(await bot.db.field("SELECT RulesChannelID FROM gateway WHERE GuildID = ?", guild_id))
+    try:
+        return bot.cache.get_guild_channel(await bot.db.field("SELECT RulesChannelID FROM gateway WHERE GuildID = ?", guild_id))
+    except Exception:
+        return None
 
 
 async def gateway__gatemessage(bot, guild_id):
@@ -49,7 +64,10 @@ async def gateway__gatemessage(bot, guild_id):
 
 
 async def gateway__blockingrole(bot, guild_id):
-    return bot.cache.get_role(await bot.db.field("SELECT BlockingRoleID FROM gateway WHERE GuildID = ?", guild_id))
+    try:
+        return bot.cache.get_role(int(await bot.db.field("SELECT BlockingRoleID FROM gateway WHERE GuildID = ?", guild_id)))
+    except Exception:
+        return None
 
 
 async def gateway__memberroles(bot, guild_id):
@@ -67,11 +85,17 @@ async def gateway__exceptionroles(bot, guild_id):
 
 
 async def gateway__welcomechannel(bot, guild_id):
-    return bot.cache.get_guild_channel(await bot.db.field("SELECT WelcomeChannelID FROM gateway WHERE GuildID = ?", guild_id))
+    try:
+        return bot.cache.get_guild_channel(await bot.db.field("SELECT WelcomeChannelID FROM gateway WHERE GuildID = ?", guild_id))
+    except Exception:
+        return None
 
 
 async def gateway__goodbyechannel(bot, guild_id):
-    return bot.cache.get_guild_channel(await bot.db.field("SELECT GoodbyeChannelID FROM gateway WHERE GuildID = ?", guild_id))
+    try:
+        return bot.cache.get_guild_channel(await bot.db.field("SELECT GoodbyeChannelID FROM gateway WHERE GuildID = ?", guild_id))
+    except Exception:
+        return None
 
 
 async def gateway__timeout(bot, guild_id):
@@ -99,7 +123,10 @@ async def gateway__goodbyebottext(bot, guild_id):
 
 
 async def warn__warnrole(bot, guild_id):
-    return bot.cache.get_role(await bot.db.field("SELECT WarnRoleID FROM warn WHERE GuildID = ?", guild_id))
+    try:
+        return bot.cache.get_role(await bot.db.field("SELECT WarnRoleID FROM warn WHERE GuildID = ?", guild_id))
+    except Exception:
+        return None
 
 
 async def warn__maxpoints(bot, guild_id):

@@ -36,7 +36,6 @@ class SetupMenu(menu.SelectionMenu):
 
     async def start(self):
         r = await super().start()
-        print(r)
 
         if r == "confirm":
             pagemap = {
@@ -58,11 +57,12 @@ class SetupMenu(menu.SelectionMenu):
                 )
             )
             if perm.MANAGE_CHANNELS:
-                lc = await self.create_text_channel(
+                lc = await self.bot.rest.create_guild_text_channel(
+                    guild=self.ctx.get_guild().id,
                     name="solaris-logs",
                     category=self.ctx.get_channel().parent_id,
                     position=self.ctx.get_channel().position,
-                    topic=f"Log output for {self.ctx.guild.me.mention}",
+                    topic=f"Log output for {self.ctx.bot.get_me().mention}",
                     reason="Needed for Solaris log output.",
                 )
                 await self.bot.db.execute(
@@ -90,7 +90,7 @@ class SetupMenu(menu.SelectionMenu):
                 )
             )
             if perm.MANAGE_ROLES:
-                ar = await self.rest.create_role(
+                ar = await self.bot.rest.create_role(
                     guild=self.ctx.get_guild().id,
                     name="Solaris Administrator",
                     permissions=hikari.Permissions(value=0),
@@ -125,8 +125,8 @@ class SetupMenu(menu.SelectionMenu):
             "description": "Congratulations - the first time setup has been completed! You can now use all of Solaris' commands, and activate all of Solaris' modules.\n\nEnjoy using Solaris!",
             "thumbnail": SUCCESS_ICON,
         }
-        await modules.config.system__runfts(self.bot, self.ctx.get_channel(), 1)
-        await self.switch(pagemap, clear_reactions=True)
+        await modules.config.system__runfts(self.ctx, self.ctx.get_channel(), 1)
+        await self.switch(pagemap, remove_all_reactions=True)
 
 
 class Modules(lightbulb.Plugin):
