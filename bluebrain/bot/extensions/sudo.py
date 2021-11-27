@@ -3,7 +3,7 @@ import lightbulb
 
 from bluebrain.bot import Blue_Bot
 
-class Admin(lightbulb.Plugin):
+class Sudo(lightbulb.Plugin):
     def __init__(self, bot: Blue_Bot) -> None:
         self.bot = bot
         super().__init__()
@@ -23,7 +23,7 @@ class Admin(lightbulb.Plugin):
 
 
 def load(bot: Blue_Bot) -> None:
-    bot.add_plugin(Admin(bot))
+    bot.add_plugin(Sudo(bot))
 
 def unload(bot: Blue_Bot) -> None:
-    bot.remove_plugin("Admin")
+    bot.remove_plugin("Sudo")

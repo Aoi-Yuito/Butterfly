@@ -6,6 +6,8 @@ from bluebrain.utils import checks
 from bluebrain.bot import Blue_Bot
 
 class Meta(lightbulb.Plugin):
+    """Commands for retrieving information regarding Solaris, from invitation links to detailed bot statistics."""
+    
     def __init__(self, bot: Blue_Bot) -> None:
         self.bot = bot
         super().__init__()
@@ -93,6 +95,8 @@ class Meta(lightbulb.Plugin):
         #    )
         #)
         #print(perm)
+        #for ext in self.bot._extensions:
+        #    await ctx.respond(self.bot.get_plugin(ext.title()))
 
 
 
